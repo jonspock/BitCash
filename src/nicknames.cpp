@@ -19,8 +19,9 @@ void InitNicknameDB()
 {
    fs::path path=GetDataDir();
    path /= "nicknames";
-    database=NicknameDatabase::Create(path);
-    DBNICKErrors nLoadWalletRet = NicknameBatch(*database,"cr+").LoadWallet();
+   database=NicknameDatabase::Create(path);
+   DBNICKErrors nLoadWalletRet = NicknameBatch(*database,"cr+").LoadWallet();
+   (void)nLoadWalletRet; // to silence unused variable warning
 }
 
 bool SetStealthAddress(const CScript script,const CPubKey address)

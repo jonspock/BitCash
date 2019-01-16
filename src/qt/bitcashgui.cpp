@@ -440,7 +440,7 @@ void BitcashGUI::importKeyBtnClicked(QString keystr)
         }
     }
     inimporting=true;
-    int64_t scanned_time = pwallet->RescanFromTime(TIMESTAMP_MIN, reserver, true /* update */);
+    //int64_t scanned_time = pwallet->RescanFromTime(TIMESTAMP_MIN, reserver, true /* update */);
     inimporting=false;
     QVariant returnedValue;
     QVariant s=QString::fromStdString("The private key has been successfully imported. You may need to restart the wallet.");
@@ -1579,10 +1579,10 @@ BitcashGUI::BitcashGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     appMenuBar(0),
     appToolBar(0),
     overviewAction(0),
-    historyAction(0),
     miningAction(0),
     nicknameAction(0),
     linksAction(0),
+    historyAction(0),
     quitAction(0),
     sendCoinsAction(0),
     sendCoinsMenuAction(0),

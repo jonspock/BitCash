@@ -207,7 +207,7 @@ void intcudadll()
        
 
         // If the function address is valid, call the function. 
-        if (runTimeLinkSuccess = (NULL != FindCyclesOnCudaDevicePtr && NULL!=SetupKernelBuffersPtr))
+        if ((runTimeLinkSuccess = (NULL != FindCyclesOnCudaDevicePtr && NULL!=SetupKernelBuffersPtr)))
         {
             SetupKernelBuffersPtr();
         }
@@ -257,7 +257,7 @@ void intcudadll()
        
 
         // If the function address is valid, call the function. 
-        if (runTimeLinkSuccess = (NULL != FindCyclesOnCudaDevicePtr && NULL!=SetupKernelBuffersPtr))
+        if ((runTimeLinkSuccess = (NULL != FindCyclesOnCudaDevicePtr && NULL!=SetupKernelBuffersPtr)))
         {
             SetupKernelBuffersPtr();
         }

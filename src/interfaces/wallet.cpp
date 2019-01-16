@@ -260,7 +260,7 @@ public:
         }
         return std::move(pending);
     }
-    std::unique_ptr<PendingWalletTx> CreateTransactionToMe(uint256& txid, int outnr, CKey key, CAmount nValue, const CScript& scriptPubKey, std::string refline, std::string& strFailReason, const CCoinControl& coin_control, CTxOut output)
+    std::unique_ptr<PendingWalletTx> CreateTransactionToMe(uint256& txid, int outnr, CKey key, CAmount nValue, const CScript& scriptPubKey, std::string refline, std::string& strFailReason, const CCoinControl& coin_control, CTxOut output) override
     { 
         LOCK2(cs_main, m_wallet.cs_wallet);
         auto pending = MakeUnique<PendingWalletTxImpl>(m_wallet);

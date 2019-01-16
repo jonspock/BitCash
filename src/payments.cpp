@@ -17,6 +17,7 @@ void InitPaymentsDB()
    path /= "Payments";
     pdatabase=PaymentsDatabase::Create(path);
     DBNICKErrors nLoadWalletRet = PaymentsBatch(*pdatabase,"cr+").LoadWallet();
+    (void)nLoadWalletRet;
 }
 
 bool SetPayment(const std::string& strPayment,const std::string& recipient, const std::string& desc,const std::string& amount,int day,int month)

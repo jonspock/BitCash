@@ -21,7 +21,7 @@ public:
     QLocale locale() const;
     void setLocale(const QLocale & locale);
 
-    State validate(QString &input, int &pos) const;
+    State validate(QString &input, int &pos) const override;
 };
 
 /** Bitcash address widget validator, checks for a valid bitcash address.
@@ -36,7 +36,7 @@ public:
     void fixup(QString & input) const override;
     QLocale locale() const;
     void setLocale(const QLocale & locale);
-    State validate(QString &input, int &pos) const;
+    State validate(QString &input, int &pos) const override;
 };
 
 class BitcashAddressCheckValidator2 : public QValidator
@@ -48,7 +48,7 @@ public:
     void fixup(QString & input) const override;
     QLocale locale() const;
     void setLocale(const QLocale & locale);
-    State validate(QString &input, int &pos) const;
+    State validate(QString &input, int &pos) const override;
 };
 
 #endif // BITCASH_QT_BITCASHADDRESSVALIDATOR_H
@@ -64,5 +64,5 @@ public:
     QLocale locale() const;
     void setLocale(const QLocale & locale);
 
-    State validate(QString &input, int &pos) const;
+    State validate(QString &input, int &pos) const override;
 };
