@@ -15,8 +15,9 @@ void InitLinksDB()
 {
    fs::path path=GetDataDir();
    path /= "Links";
-    ldatabase=LinksDatabase::Create(path);
-    DBNICKErrors nLoadWalletRet = LinksBatch(*ldatabase,"cr+").LoadWallet();
+   ldatabase=LinksDatabase::Create(path);
+   DBNICKErrors nLoadWalletRet = LinksBatch(*ldatabase,"cr+").LoadWallet();
+   (void)nLoadWalletRet; // to silence unused variable warning
 }
 
 bool SetLink(const std::string& strlink,const std::string& desc,const std::string& amount,int status,uint64_t timestamp)

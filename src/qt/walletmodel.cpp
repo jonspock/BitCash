@@ -155,7 +155,7 @@ WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransact
                 const unsigned char* scriptStr = (const unsigned char*)out.script().data();
                 CScript scriptPubKey(scriptStr, scriptStr+out.script().size());
                 CAmount nAmount = out.amount();
-                CRecipient recipient = {scriptPubKey, nAmount, rcp.fSubtractFeeFromAmount};//TODO: up to now: No reference line for payment requests
+                CRecipient recipient = {scriptPubKey, nAmount, rcp.fSubtractFeeFromAmount,"",CPubKey()};//TODO: up to now: No reference line for payment requests
                 vecSend.push_back(recipient);
             }
             if (subtotal <= 0)

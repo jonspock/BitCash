@@ -170,13 +170,13 @@ PoW GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pbloc
             {
                 if (times[i]<=times[nCountBlocks])
                 {
-                   for (int e=i+1;e<=nCountBlocks-1;e++){
+                   for (unsigned int e=i+1;e<=nCountBlocks-1;e++){
                        times[e]=(times[nCountBlocks]-times[i])/((nCountBlocks)-(i))+times[i];
                    }                   
                    break;
                 } else if (i==0)
                 {
-                   for (int e=0;e<=nCountBlocks-1;e++){
+                   for (unsigned int e=0;e<=nCountBlocks-1;e++){
                        times[e]=times[nCountBlocks];
                    }
                 }
