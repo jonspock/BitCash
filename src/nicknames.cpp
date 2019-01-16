@@ -16,8 +16,9 @@ void InitNicknameDB()
 {
    fs::path path=GetDataDir();
    path /= "nicknames";
-    database=NicknameDatabase::Create(path);
-    DBNICKErrors nLoadWalletRet = NicknameBatch(*database,"cr+").LoadWallet();
+   database=NicknameDatabase::Create(path);
+   DBNICKErrors nLoadWalletRet = NicknameBatch(*database,"cr+").LoadWallet();
+   (void)nLoadWalletRet; // to silence unused variable warning
 }
 
 bool SetNickname(const std::string& strName,const CPubKey address, uint256 hash, bool storeblockhash)
