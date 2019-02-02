@@ -1216,8 +1216,17 @@ bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus:
     }
 
     // Check the header
-    if (/*validate && */!cuckoo::VerifyProofOfWork(block.GetHash(), block.nBits, block.nEdgeBits, block.sCycle, consensusParams))
-        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+    const bool x16ractive = (block.nVersion & ((uint32_t)1) << 3) != 0;
+
+    if (x16ractive) {
+        if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+            return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+    } else {
+    if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+
+        if (/*validate && */!cuckoo::VerifyProofOfWork(block.GetHash(), block.nBits, block.nEdgeBits, block.sCycle, consensusParams))
+            return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
+    }
 
     return true;
 }
@@ -1836,6 +1845,9 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
             nVersion |= VersionBitsMask(params, static_cast<Consensus::DeploymentPos>(i));
         }
     }
+
+    if (pindexPrev->nTime > params.X16RTIME)
+       nVersion |= ((uint32_t)1) << 3;
 
     return nVersion;
 }
@@ -3223,8 +3235,15 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !cuckoo::VerifyProofOfWork(block.GetHash(), block.nBits, block.nEdgeBits, block.sCycle, consensusParams))
-        return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+    const bool x16ractive = (block.nVersion & ((uint32_t)1) << 3) != 0;
+
+    if (x16ractive) {
+        if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+            return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed"); 
+    } else {
+        if (fCheckPOW && !cuckoo::VerifyProofOfWork(block.GetHash(), block.nBits, block.nEdgeBits, block.sCycle, consensusParams))
+            return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+    }
 
     return true;
 }
@@ -3238,6 +3257,14 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     if (block.fChecked)
         return true;
+
+    const bool x16ractive = (block.nVersion & ((uint32_t)1) << 3) != 0;
+
+    //Check that the correct block version with the hashing algo is used     
+    if (x16ractive != block.nTime > consensusParams.X16RTIME) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-hash-algo", false, "The wrong hashing algo is used for the block.");
+    }
+
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
     if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW)) {
@@ -3411,10 +3438,15 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     const Consensus::Params& consensusParams = params.GetConsensus();
     auto pow = GetNextWorkRequired(pindexPrev, &block, consensusParams);
     if (block.nBits != pow.nBits) {
-        return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
+        auto pow = GetNextWorkRequired(pindexPrev, &block, consensusParams, true);//do not block the blockchain download from the nodes of the old chain before the x16 fork
+        if (block.nBits != pow.nBits) {
+            return state.DoS(100, false, REJECT_INVALID, "bad-diffbits", false, "incorrect proof of work");
+        }
     }
 
-    if (block.nEdgeBits != pow.nEdgeBits) {
+    const bool x16ractive = (block.nVersion & ((uint32_t)1) << 3) != 0;
+
+    if (!x16ractive && block.nEdgeBits != pow.nEdgeBits) {
         return state.DoS(100, false, REJECT_INVALID, "bad-nodesbits", false, "incorrect proof of work");
     }
 

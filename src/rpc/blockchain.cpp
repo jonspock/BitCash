@@ -141,14 +141,15 @@ UniValue blockheaderToJSON(const CBlockIndex* blockindex)
     result.pushKV("confirmations", confirmations);
     result.pushKV("height", blockindex->nHeight);
     result.pushKV("version", blockindex->nVersion);
+    const bool x16ractive = (blockindex->nVersion & ((uint32_t)1) << 3) != 0;
     result.pushKV("versionHex", strprintf("%08x", blockindex->nVersion));
     result.pushKV("merkleroot", blockindex->hashMerkleRoot.GetHex());
     result.pushKV("time", (int64_t)blockindex->nTime);
     result.pushKV("mediantime", (int64_t)blockindex->GetMedianTimePast());
     result.pushKV("nonce", (uint64_t)blockindex->nNonce);
-    result.pushKV("cycle", GetCycleStr(blockindex->sCycle));
+    if (!x16ractive) result.pushKV("cycle", GetCycleStr(blockindex->sCycle));
     result.pushKV("bits", strprintf("%08x", blockindex->nBits));
-    result.pushKV("edgebits", strprintf("%u", blockindex->nEdgeBits));
+    if (!x16ractive) result.pushKV("edgebits", strprintf("%u", blockindex->nEdgeBits));
     result.pushKV("difficulty", GetDifficulty(blockindex));
     result.pushKV("chainwork", blockindex->nChainWork.GetHex());
 

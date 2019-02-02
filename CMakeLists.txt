@@ -43,11 +43,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 ")
 
 
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	add_compile_options(-Wno-potentially-evaluated-expression -Wno-unused-const-variable -Wno-unused-function -Wno-deprecated-declarations -Wno-inaccessible-base -Wno-unused-local-typedefs -Wno-logical-op-parentheses -Wno-shift-negative-value -Wno-array-bounds)
-	add_definitions("-DOS_MACOSX -DLEVELDB_PLATFORM_POSIX -DENABLE_ZMQ")
+	add_compile_options(-Wno-potentially-evaluated-expression -Wno-unused-const-variable -Wno-unused-function -Wno-deprecated-declarations -Wno-inaccessible-base -Wno-unused-local-typedefs -Wno-logical-op-parentheses -Wno-shift-negative-value -Wno-array-bounds -Wno-unused-function -Wno-missing-field-initializers)
+	add_definitions("-DOS_MACOSX -DLEVELDB_PLATFORM_POSIX") ### -DENABLE_ZMQ")
 	add_definitions("-DENABLE_WALLET")
-	add_definitions("-Werror")
-	add_definitions("-Wno-missing-field-initializers")
 else()
 	add_definitions("-Wno-cpp -Wno-unused-function")
 	set(ANL anl)
@@ -181,6 +179,27 @@ SET(CONSENSUS_CRYPTO
   ./src/cuckoo/mean_cuckoo_.cpp
   ./src/cuckoo/cuckoo.cpp
   ./src/crypto/blake2/blake2b-ref.c
+
+  ./src/crypto/aes_helper.c
+  ./src/crypto/blake.c
+  ./src/crypto/bmw.c
+  ./src/crypto/cubehash.c
+  ./src/crypto/echo.c
+  ./src/crypto/groestl.c
+  ./src/crypto/jh.c
+  ./src/crypto/keccak.c
+  ./src/crypto/luffa.c
+  ./src/crypto/sha256_sse4.cpp
+  ./src/crypto/shavite.c
+  ./src/crypto/simd.c
+  ./src/crypto/skein.c
+  ./src/crypto/sph_hamsi.c
+  ./src/crypto/sph_hamsi_helper.c
+  ./src/crypto/sph_sha2.c
+  ./src/crypto/sph_sha512.c
+  ./src/crypto/sph_shabal.c
+  ./src/crypto/sph_whirlpool.c
+  ./src/crypto/sph_fugue.c
 )
 
 SET(SOURCES

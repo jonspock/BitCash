@@ -111,6 +111,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
         consensus.nCuckooProofSize = 42;
+        consensus.X16RTIME = 1550923200;//Time of X16R fork
 
         // The best chain should have at least this much work.                                                
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -255,8 +256,8 @@ copy merkle root
                 { 20000, uint256S("0x7f6c97894c2b98c963fa879a546047545e213b56e95766f9ba06e7fdc50461bb")},
                 { 30000, uint256S("0x3ca6f893ba77f94bcd7880828c80e25d8acae947091a8c703d4bbc888652a763")},
                 { 40000, uint256S("0x1509b6323cf48a74838ee3f7b2cca7e02f5c44ef78fe9e9b2133eeb94f92a26a")},
-		{ 70000, uint256S("0xd7b3f34e0a7c5cf1b781dd8ce38f146a40bf58074fa7f0977137ac5397b215b4")},
-		{ 100000, uint256S("0x4dcc1d2efb17b25b57d1d9430751b809338c68db9164fb09f221daf8e1ca26ce")},
+        		{ 70000, uint256S("0xd7b3f34e0a7c5cf1b781dd8ce38f146a40bf58074fa7f0977137ac5397b215b4")},
+		        { 100000, uint256S("0x4dcc1d2efb17b25b57d1d9430751b809338c68db9164fb09f221daf8e1ca26ce")},
                 { 130000, uint256S("0xc00a7ab6ca796be8757246a353436031908943b1108dac52879e0506b09c3be0")},
 
             }
@@ -319,6 +320,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
         consensus.nCuckooProofSize = 42;
+        consensus.X16RTIME = 1549108800;//Time of X16R fork
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -485,6 +487,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = Consensus::BIP9Deployment::ALWAYS_ACTIVE;
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
         consensus.nCuckooProofSize = 42;
+        consensus.X16RTIME = 1549108800;//Time of X16R fork
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");

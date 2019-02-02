@@ -282,6 +282,10 @@ libbitcash_wallet_a_SOURCES = \
 crypto_libbitcash_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(PIC_FLAGS)
 crypto_libbitcash_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libbitcash_crypto_a_SOURCES = \
+  crypto/blake2/blake2b-ref.c \
+  crypto/blake2/blake2.h \
+  crypto/blake2/blake2-impl.h \
+  crypto/siphashxN.h \
   crypto/aes.cpp \
   crypto/aes.h \
   crypto/chacha20.h \
@@ -293,16 +297,50 @@ crypto_libbitcash_crypto_a_SOURCES = \
   crypto/hmac_sha512.h \
   crypto/ripemd160.cpp \
   crypto/ripemd160.h \
+  crypto/aes_helper.c \
+  crypto/blake.c \
+  crypto/bmw.c \
+  crypto/cubehash.c \
+  crypto/echo.c \
+  crypto/groestl.c \
+  crypto/jh.c \
+  crypto/keccak.c \
+  crypto/luffa.c \
+  crypto/shavite.c \
+  crypto/simd.c \
+  crypto/skein.c \
+  crypto/sph_hamsi.c \
+  crypto/sph_hamsi_helper.c \
+  crypto/sph_fugue.c \
+  crypto/sph_shabal.c \
+  crypto/sph_whirlpool.c \
+  crypto/sph_sha2.c \
+  crypto/sph_sha512.c \
+  crypto/ripemd160.h \
   crypto/sha1.cpp \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
-  crypto/sha512.cpp \
   crypto/sha512.h \
-  crypto/blake2/blake2b-ref.c \
-  crypto/blake2/blake2.h \
-  crypto/blake2/blake2-impl.h \
-  crypto/siphashxN.h
+  crypto/sph_blake.h \
+  crypto/sph_bmw.h \
+  crypto/sph_cubehash.h \
+  crypto/sph_echo.h \
+  crypto/sph_groestl.h \
+  crypto/sph_jh.h \
+  crypto/sph_keccak.h \
+  crypto/sph_luffa.h \
+  crypto/sph_shavite.h \
+  crypto/sph_simd.h \
+  crypto/sph_skein.h \
+  crypto/sph_hamsi.h \
+  crypto/sph_fugue.h \
+  crypto/sph_shabal.h \
+  crypto/sph_whirlpool.h \
+  crypto/sph_sha2.h \
+  crypto/sph_types.h \
+  crypto/sha512.cpp \
+  crypto/sha512.h
 
 if USE_ASM
 crypto_libbitcash_crypto_a_SOURCES += crypto/sha256_sse4.cpp

@@ -22,7 +22,7 @@ using Consensus::PoW;
 }*/
 
 //uses the "Virtual Time Span Retargeting Algorithm", developed by the BitCash developers to retarget the nbits after every block
-PoW GetNextWorkRequiredBug(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
+PoW GetNextWorkRequiredBug(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params, bool beforex16rtimefork)
 {
     assert(pindexLast != nullptr);
 
@@ -30,14 +30,33 @@ PoW GetNextWorkRequiredBug(const CBlockIndex* pindexLast, const CBlockHeader* pb
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit.uHashLimit);
     int64_t nPastBlocks = 24;
 
+    const CBlockIndex *pindex = pindexLast;
+
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
         return PoW{bnPowLimit.GetCompact(),pindexLast->nEdgeBits};
     }
 
+    //reset Difficulty when the X16R fork happens
+    if (!beforex16rtimefork) {
+        for (unsigned int nCountBlocks = 0; nCountBlocks <= nPastBlocks-1; nCountBlocks++) {
+
+            int64_t newtime = pindexLast->nTime;
+
+            if(nCountBlocks != nPastBlocks) {
+                assert(pindex->pprev); // should never fail
+                pindex = pindex->pprev;
+            }
+
+            if (newtime > params.X16RTIME-5*60 && pindex->nTime <= params.X16RTIME+5*60) {
+                return PoW{bnPowLimit.GetCompact(),pindexLast->nEdgeBits};
+            }
+        }
+    }
+
     arith_uint256 bnTargetNow = arith_uint256().SetCompact(pindexLast->nBits);    
 
-    const CBlockIndex *pindex = pindexLast;
+    pindex = pindexLast;
 
     int64_t lasttime,currenttime,virtualtimespan;
     arith_uint256 LastbnTarget;    
@@ -123,13 +142,14 @@ PoW GetNextWorkRequiredBug(const CBlockIndex* pindexLast, const CBlockHeader* pb
 }
 
 //uses the "Virtual Time Span Retargeting Algorithm", developed by the BitCash developers to retarget the nbits after every block
-PoW GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
+PoW GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params, bool beforex16rtimefork)
 {
     assert(pindexLast != nullptr);
 
-    if (pindexLast->nHeight<=52063) return GetNextWorkRequiredBug(pindexLast,pblock,params);
+    if (pindexLast->nHeight<=52063) return GetNextWorkRequiredBug(pindexLast,pblock,params,beforex16rtimefork);
 
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit.uHashLimit);
+    const CBlockIndex *pindex = pindexLast;
     int64_t nPastBlocks = 24;
 
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
@@ -137,9 +157,26 @@ PoW GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pbloc
         return PoW{bnPowLimit.GetCompact(),pindexLast->nEdgeBits};
     }
 
-    arith_uint256 bnTargetNow = arith_uint256().SetCompact(pindexLast->nBits);    
+    //reset Difficulty when the X16R fork happens
+    if (!beforex16rtimefork) {
+        for (unsigned int nCountBlocks = 0; nCountBlocks <= nPastBlocks-1; nCountBlocks++) {
 
-    const CBlockIndex *pindex = pindexLast;
+            int64_t newtime = pindexLast->nTime;
+
+            if(nCountBlocks != nPastBlocks) {
+                assert(pindex->pprev); // should never fail
+                pindex = pindex->pprev;
+            }
+
+            if (newtime > params.X16RTIME-5*60 && pindex->nTime <= params.X16RTIME+5*60) {
+                return PoW{bnPowLimit.GetCompact(),pindexLast->nEdgeBits};
+            }
+        }
+    }
+
+    pindex = pindexLast;
+
+    arith_uint256 bnTargetNow = arith_uint256().SetCompact(pindexLast->nBits);    
 
     int64_t lasttime,currenttime,virtualtimespan;
     arith_uint256 LastbnTarget;    

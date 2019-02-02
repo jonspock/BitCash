@@ -90,6 +90,7 @@ struct Params {
     uint256 defaultAssumeValid;
     /** Cuckoo cycle length */
     uint8_t nCuckooProofSize;
+    uint64_t X16RTIME;
 };
 } // namespace Consensus
 

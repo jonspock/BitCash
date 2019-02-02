@@ -38,7 +38,7 @@
 #include <univalue.h>
 #include <iostream>
 
-
+/*
 static void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
 {
     // Call into TxToUniv() in bitcash-common to decode the transaction hex.
@@ -64,6 +64,7 @@ static void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& 
         }
     }
 }
+ */
 
 void TxToUnivWithWallet(const CWallet* pwallet,const CTransaction& tx, const uint256& hashBlock, UniValue& entry, bool include_hex, int serialize_flags)
 {

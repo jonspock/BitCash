@@ -293,14 +293,22 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
                 pindexNew->sCycle       = diskindex.sCycle;
 
 
-                if (!cuckoo::VerifyProofOfWork(
-                        pindexNew->GetBlockHash(),
-                        pindexNew->nBits,
-                        pindexNew->nEdgeBits,
-                        pindexNew->sCycle,
-                        consensusParams)) { 
+                const bool x16ractive = (diskindex.nVersion & ((uint32_t)1) << 3) != 0;
 
-                    return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
+                if (x16ractive) {
+                    if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
+                        return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
+                } else {
+
+                    if (!cuckoo::VerifyProofOfWork(
+                            pindexNew->GetBlockHash(),
+                            pindexNew->nBits,
+                            pindexNew->nEdgeBits,
+                            pindexNew->sCycle,
+                            consensusParams)) { 
+
+                        return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
+                    }
                 }
 
                 pcursor->Next();

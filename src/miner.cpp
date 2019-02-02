@@ -61,6 +61,9 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
     if (consensusParams.fPowAllowMinDifficultyBlocks)
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams).nBits;
 
+    if (pblock->nTime > consensusParams.X16RTIME)
+       pblock->nVersion |= ((uint32_t)1) << 3;
+
     return nNewTime - nOldTime;
 }
 
@@ -137,6 +140,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlockWithScriptPubKey(c
         pblock->nVersion = gArgs.GetArg("-blockversion", pblock->nVersion);
 
     pblock->nTime = GetAdjustedTime();
+    if (pblock->nTime > chainparams.GetConsensus().X16RTIME)
+       pblock->nVersion |= ((uint32_t)1) << 3;
+
     const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
 
     nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST)
@@ -232,6 +238,8 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(interfaces::Walle
         pblock->nVersion = gArgs.GetArg("-blockversion", pblock->nVersion);
 
     pblock->nTime = GetAdjustedTime();
+    if (pblock->nTime > chainparams.GetConsensus().X16RTIME)
+       pblock->nVersion |= ((uint32_t)1) << 3;
     const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
 
     nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST)
@@ -701,44 +709,78 @@ void MinerWorker(int thread_id, MinerContext& ctx)
         uint256 hash;
         std::set<uint32_t> cycle;
 
+        const bool x16ractive = (pblock->nVersion & ((uint32_t)1) << 3) != 0;
+
         while (ctx.alive) {
             // Check if something found
             graphs_checked++;
-            bool cycle_found = false;
+            bool cycle_found = false;           
 
-            if (cuckoo::FindProofOfWorkAdvanced(
-                        pblock->GetHash(),
-                        pblock->nBits,
-                        pblock->nEdgeBits,
-                        cycle,
-                        ctx.chainparams.GetConsensus(),
-                        ctx.pow_threads,
-                        cycle_found,
-                        ctx.pool, trygpumining, gpuminingfailed, ctx.gpuid, ctx.selectgpucpu, ctx.gpumining)) {
-                cycles_found++;
+            if (x16ractive) {
+                unsigned int nMaxTries = 1000;
+                while (nMaxTries > 0 && ctx.alive) {                    
+                    cycles_found++;
+                    if (CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus()))
+                    {                        
+                        LogPrintf("%d: BitCash Miner:\n", thread_id);
+                        LogPrintf(
+                            "\n\n\nproof-of-work found within %8.3f seconds \n"
+                            "\tblock hash: %s\n\tnonce: %d\n\ttarget: %s\n\n\n",
+                        static_cast<double>(GetTimeMillis() - nStart) / 1e3,
+                        pblock->GetHash().GetHex(),
+                        pblock->nNonce,
+                        hashTarget.GetHex());                    
 
-                // Found a solution
-                pblock->sCycle = cycle;
+                        if (ProcessBlockFound(pblock, ctx.chainparams)) minedcoins+=19350000000;
 
-                auto cycleHash = SerializeHash(cycle);
+                        // In regression test mode, stop mining after a block is found.
+                        if (ctx.chainparams.MineBlocksOnDemand())
+                            throw boost::thread_interrupted();
 
-                LogPrintf("%d: BitCash Miner:\n", thread_id);
-                LogPrintf(
-                        "\n\n\nproof-of-work found within %8.3f seconds \n"
-                        "\tblock hash: %s\n\tnonce: %d\n\tcycle hash: %s\n\ttarget: %s\n\n\n",
-                    static_cast<double>(GetTimeMillis() - nStart) / 1e3,
-                    pblock->GetHash().GetHex(),
-                    pblock->nNonce,
-                    cycleHash.GetHex(),
-                    hashTarget.GetHex());                    
+                        break;
+                    }
+                    graphs_checked++;
+                    ++pblock->nNonce;
+                    --nMaxTries;
+                    if (pblock->nNonce % ctx.nonces_per_thread == 0) {
+                        pblock->nNonce += ctx.nonces_per_thread * (ctx.threads_number - 1);
+                    }
+                }
+            } else {
+                if (cuckoo::FindProofOfWorkAdvanced(
+                            pblock->GetHash(),
+                            pblock->nBits,
+                            pblock->nEdgeBits,
+                            cycle,
+                            ctx.chainparams.GetConsensus(),
+                            ctx.pow_threads,
+                            cycle_found,
+                            ctx.pool, trygpumining, gpuminingfailed, ctx.gpuid, ctx.selectgpucpu, ctx.gpumining)) {
+                    cycles_found++;
 
-                    if (ProcessBlockFound(pblock, ctx.chainparams)) minedcoins+=19350000000;
+                    // Found a solution
+                    pblock->sCycle = cycle;
 
-                // In regression test mode, stop mining after a block is found.
-                if (ctx.chainparams.MineBlocksOnDemand())
-                    throw boost::thread_interrupted();
+                    auto cycleHash = SerializeHash(cycle);
 
-                break;
+                    LogPrintf("%d: BitCash Miner:\n", thread_id);
+                    LogPrintf(
+                            "\n\n\nproof-of-work found within %8.3f seconds \n"
+                            "\tblock hash: %s\n\tnonce: %d\n\tcycle hash: %s\n\ttarget: %s\n\n\n",
+                        static_cast<double>(GetTimeMillis() - nStart) / 1e3,
+                        pblock->GetHash().GetHex(),
+                        pblock->nNonce,
+                        cycleHash.GetHex(),
+                        hashTarget.GetHex());                    
+
+                        if (ProcessBlockFound(pblock, ctx.chainparams)) minedcoins+=19350000000;
+
+                    // In regression test mode, stop mining after a block is found.
+                    if (ctx.chainparams.MineBlocksOnDemand())
+                        throw boost::thread_interrupted();
+
+                    break;
+                }
             }
             triedoneproofofwork = true;
 
@@ -746,14 +788,12 @@ void MinerWorker(int thread_id, MinerContext& ctx)
                 cycles_found++;
             }
 
-        if (ctx.alive && g_connman) {
-            g_connman->AddCheckedGraphs(graphs_checked);
-            graphs_checked=0;
-            g_connman->AddFoundCycles(cycles_found);
-            cycles_found=0;
-          
-        }
-
+            if (ctx.alive && g_connman) {
+                g_connman->AddCheckedGraphs(graphs_checked);
+                graphs_checked=0;
+                g_connman->AddFoundCycles(cycles_found);
+                cycles_found=0;          
+            }
 
             // Check for stop or if block needs to be rebuilt
             if (!ctx.alive) {

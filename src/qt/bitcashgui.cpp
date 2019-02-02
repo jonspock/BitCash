@@ -1657,7 +1657,7 @@ BitcashGUI::BitcashGUI(interfaces::Node& node, const PlatformStyle *_platformSty
         walletFrame = new WalletFrame(_platformStyle, this);
         //setCentralWidget(walletFrame);
 
-//    qInstallMessageHandler(myMessageOutput); // Install the handler
+    qInstallMessageHandler(myMessageOutput); // Install the handler
 
     QFontDatabase::addApplicationFont(":/res/assets/Montserrat-Bold.otf");
     QFontDatabase::addApplicationFont(":/res/assets/Montserrat-Light.otf");

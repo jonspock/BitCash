@@ -144,20 +144,30 @@ UniValue generateBlocks(
         std::set<uint32_t> cycle;
         bool trygpumining = false;
         bool gpuminingfailed = false;
-        while (nMaxTries > 0
-                && pblock->nNonce < nInnerLoopCount
-                && !cuckoo::FindProofOfWorkAdvanced(
-                    pblock->GetHash(),
-                    pblock->nBits,
-                    pblock->nEdgeBits,
-                    cycle,
-                    consensusParams,
-                    nThreads,
-                    cycle_found,
-                    &pool, trygpumining, gpuminingfailed, 0, false, false)) {
 
-            ++pblock->nNonce;
-            --nMaxTries;
+        const bool x16ractive = (pblock->nVersion & ((uint32_t)1) << 3) != 0;
+
+        if (x16ractive) {
+            while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus())) {
+                ++pblock->nNonce;
+                --nMaxTries;
+            }
+        } else {
+            while (nMaxTries > 0
+                    && pblock->nNonce < nInnerLoopCount
+                    && !cuckoo::FindProofOfWorkAdvanced(
+                        pblock->GetHash(),
+                        pblock->nBits,
+                        pblock->nEdgeBits,
+                        cycle,
+                        consensusParams,
+                        nThreads,
+                        cycle_found,
+                        &pool, trygpumining, gpuminingfailed, 0, false, false)) {
+    
+                ++pblock->nNonce;
+                --nMaxTries;
+            }
         }
 
         if (nMaxTries == 0) {
@@ -168,7 +178,9 @@ UniValue generateBlocks(
             continue;
         }
 
-        assert(cycle.size() == consensusParams.nCuckooProofSize);
+        if (!x16ractive) {
+            assert(cycle.size() == consensusParams.nCuckooProofSize);
+        }
 
         pblock->sCycle = cycle;
 

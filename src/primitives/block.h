@@ -89,14 +89,17 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(this->nVersion);
+        const bool x16ractive = (this->nVersion & ((uint32_t)1) << 3) != 0;
         READWRITE(hashPrevBlock);
         READWRITE(hashMerkleRoot);
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        READWRITE(nEdgeBits);
-        if (!(s.GetType() & SER_GETHASH)) {
-            READWRITE(sCycle);
+        if (!x16ractive) {
+            READWRITE(nEdgeBits);
+            if (!(s.GetType() & SER_GETHASH)) {
+                READWRITE(sCycle);
+            }
         }
     }
 
